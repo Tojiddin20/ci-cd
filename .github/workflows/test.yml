@@ -6,13 +6,19 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  DOTNET_VERSION: 8.0.x
+  BUILD_CONFIGURATION: Release
+  PROJECT_PATH: DemoApi
+  SERVICE_NAME: DemoApi
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        working-directory: DemoApi
+        working-directory: ${{ env.PROJECT_PATH }}
 
     steps:
       - name: Checkout repository
@@ -21,10 +27,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build project
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+
+      - name: Print service name
+        run: echo "Building service $SERVICE_NAME"
