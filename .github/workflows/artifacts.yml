@@ -1,0 +1,40 @@
+name: Secret Demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  show-secret-usage:
+    runs-on: ubuntu-latest
+
+    env:
+      DemoSettings__Secret: ${{ secrets.DEMO_SECRET }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore DemoApi/DemoApi.csproj
+
+      - name: Build
+        run: dotnet build DemoApi/DemoApi.csproj --configuration Release --no-restore
+
+      - name: Show that secret is available to the app
+        run: |
+          if [ -z "$DemoSettings__Secret" ]; then
+            echo "DEMO_SECRET is not configured in repository secrets"
+            exit 1
+          fi
+
+          echo "Secret received by workflow"
+          echo "Secret length: ${#DemoSettings__Secret}"
+          echo "The app will read it as DemoSettings:Secret"
