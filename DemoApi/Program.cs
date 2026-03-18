@@ -14,6 +14,24 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapGet("/secret-demo", (IConfiguration configuration) =>
+{
+    var configuredSecret = configuration["DemoSettings:Secret"] ?? "not-configured";
+    var source = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DemoSettings__Secret"))
+        ? "appsettings"
+        : "environment";
+
+    return Results.Ok(new
+    {
+        source,
+        secretLength = configuredSecret.Length,
+        preview = configuredSecret.Length <= 4
+            ? "****"
+            : $"{configuredSecret[..2]}***{configuredSecret[^2..]}"
+    });
+})
+.WithName("GetSecretDemo");
+
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
